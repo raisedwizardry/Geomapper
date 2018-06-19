@@ -2,42 +2,9 @@
 @{
     ViewData["Title"] = "Map";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
-
-<h2>Map</h2>
-<div id="myMap" style='position:relative;width:600px;height:400px;'></div>
-<script type="text/javascript">
-var map = null;
-
-function LoadMap() {
-    map = new Microsoft.Maps.Map('#myMap', {
-        credentials: "",
-        center: new Microsoft.Maps.Location(47.6, -122.34),
-        mapTypeId: Microsoft.Maps.MapTypeId.aerial,
-        zoom: 10
-    });
-
-    //Load GeoJSON module.
-    Microsoft.Maps.loadModule('Microsoft.Maps.GeoJson', function () {
-
-        //Read the GeoJSON file that is hosted on the same domain.
-        Microsoft.Maps.GeoJson.readFromUrl('https://opendata.arcgis.com/datasets/67a8ff23b5f54f15b7133b8c30981441_0.geojson',
-            function (shapes) {
-                //Add the shape(s) to the map.
-                map.entities.push(shapes);
-            });
-    });
-
-
-    ////Load the Well Known Text module.
-    //Microsoft.Maps.loadModule('Microsoft.Maps.WellKnownText', function () {
-    //    //Parse well known text string.
-    //    var pin = Microsoft.Maps.WellKnownText.read('POINT(-122.34009 47.60995)');
-
-    //    //Add parsed shape to the map.
-    //    map.entities.push(pin);
-    //});
-
-    }
-</script>
 <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?callback=LoadMap" async defer></script>
+<script type="text/javascript" src="~/js/map.js"></script>
+<h2>Map</h2>
+<div id="myMap" style="position:relative;width:600px;height:400px;"></div>
