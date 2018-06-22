@@ -31,11 +31,28 @@
     var map = new ol.Map({
         layers: [raster, vector],
         target: 'map',
+        interactions: ol.interaction.defaults({
+            doubleClickZoom: false,
+            dragAndDrop: false,
+            dragpan: false,
+            keyboardPan: false,
+            keyboardZoom: false,
+            mouseWheelZoom: false,
+            pointer: false,
+            select: false
+        }),
         view: new ol.View({
             center: [0, 0],
             zoom: 2
         })
     });
+
+    for (var i = 0; i < map.controls.length; i++) {
+        if (map.controls[i].displayClass ==
+            "olControlNavigation") {
+            map.controls[i].deactivate();
+        }
+    }
 
     var select = null;  // ref to currently selected interaction
 
