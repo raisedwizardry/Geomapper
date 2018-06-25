@@ -2,8 +2,7 @@ var map = L.map('map').setView([45.1, -86.4997], 6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 18,
-    id: null,
-    //accessToken: 'pk.eyJ1IjoicmFpc2Vkd2l6YXJkcnkiLCJhIjoiY2ppcTRudnZjMDB1NzN3bzMyOWswYzNlYSJ9.ryEkxuzJq8FlhLFUtXRm5w'
+    id: null
 }).addTo(map);
 
 
@@ -24,6 +23,10 @@ info.update = function (props) {
 
 info.listcourts = function (props) {
     console.log(props.NAME);
+    var CRMApi = 'http://web-dev/CRMAPI/api/GetCurrentCourtAddressByCounty?countyName=' + props.NAME;
+    $.get(CRMApi, function (data, status) {
+        cosole.log(data + "  " + status);
+    });
     //hit the crmapi to retrieve county data
     //const countyCourtsData = fetch('http://web-dev/CRMAPI/api/GetCurrentCourtAddressByCounty?countyName='+ props.NAME);
     //console.log(countyCourtsData); 
@@ -118,7 +121,7 @@ function style(feature) {
         opacity: 1,
         color: 'white',
         dashArray: '3',
-        fillOpacity: 0.7
+        fillOpacity: 0.5
     };
 }
 
@@ -163,10 +166,6 @@ function resetHighlight(e) {
 	info.update();
 }
 
-function displayCountyDetails(e) {
-    map.fitBounds(e.target.getBounds());
-    clickFeature(e);
-}
 //function zoomToFeature(e) {
 //	map.fitBounds(e.target.getBounds());
 //}
