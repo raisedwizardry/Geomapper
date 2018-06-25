@@ -1,10 +1,9 @@
-var map = L.map('map').setView([37.8, -96], 4);
+var map = L.map('map').setView([45.1, -86.4997], 6);
 
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 18,
-    id: 'mapbox.light',
-    accessToken: 'pk.eyJ1IjoicmFpc2Vkd2l6YXJkcnkiLCJhIjoiY2ppcTRudnZjMDB1NzN3bzMyOWswYzNlYSJ9.ryEkxuzJq8FlhLFUtXRm5w'
+    id: null,
+    //accessToken: 'pk.eyJ1IjoicmFpc2Vkd2l6YXJkcnkiLCJhIjoiY2ppcTRudnZjMDB1NzN3bzMyOWswYzNlYSJ9.ryEkxuzJq8FlhLFUtXRm5w'
 }).addTo(map);
 
 
@@ -21,6 +20,82 @@ info.update = function (props) {
 	this._div.innerHTML = '<h4>County Names</h4>' +  (props ?
 		'<b>' + props.NAME + '</b><br />' + props.ACRES + '  Acres'
 		: 'Hover over a state');
+};
+
+info.listcourts = function (props) {
+    console.log(props.NAME);
+    //hit the crmapi to retrieve county data
+    //const countyCourtsData = fetch('http://web-dev/CRMAPI/api/GetCurrentCourtAddressByCounty?countyName='+ props.NAME);
+    //console.log(countyCourtsData); 
+    var countyCourtsData = [
+        {
+            "OrganizationId": "f224a5c9-dbd0-e511-80db-005056836f2c",
+            "FullOrganizationCode": "C29~1",
+            "OrganizationCode": "C29",
+            "DivisionType": null,
+            "OrganizationName": "29th Circuit Court - Clinton",
+            "OrganizationType": "Court",
+            "OrganizationSubType": "Circuit",
+            "ParentOrganizationId": "a8c13f54-dcd0-e511-80db-005056836f2c",
+            "JurisdictionalCountyList": "CLINTON",
+            "OraclePrimaryKey": 5010,
+            "MCLAText": "Clinton County",
+            "segment": 167410000
+        },
+        {
+            "OrganizationId": "f5b19fcf-dbd0-e511-80db-005056836f2c",
+            "FullOrganizationCode": "P19",
+            "OrganizationCode": "P19",
+            "DivisionType": null,
+            "OrganizationName": "Clinton County Probate Court",
+            "OrganizationType": "Court",
+            "OrganizationSubType": "Probate",
+            "ParentOrganizationId": null,
+            "JurisdictionalCountyList": "CLINTON",
+            "OraclePrimaryKey": 425,
+            "MCLAText": "Clinton County",
+            "segment": null
+        },
+        {
+            "OrganizationId": "a8c13f54-dcd0-e511-80db-005056836f2c",
+            "FullOrganizationCode": "C29",
+            "OrganizationCode": "C29",
+            "DivisionType": null,
+            "OrganizationName": "29th Circuit Court",
+            "OrganizationType": "Court",
+            "OrganizationSubType": "Circuit",
+            "ParentOrganizationId": null,
+            "JurisdictionalCountyList": "CLINTON, GRATIOT",
+            "OraclePrimaryKey": 128,
+            "MCLAText": "Clinton and Gratiot Counties",
+            "segment": null
+        },
+        {
+            "OrganizationId": "490eeb88-ddd0-e511-80db-005056836f2c",
+            "FullOrganizationCode": "D65A",
+            "OrganizationCode": "D65A",
+            "DivisionType": null,
+            "OrganizationName": "65A District Court",
+            "OrganizationType": "Court",
+            "OrganizationSubType": "District",
+            "ParentOrganizationId": null,
+            "JurisdictionalCountyList": "CLINTON",
+            "OraclePrimaryKey": 312,
+            "MCLAText": "Clinton County",
+            "segment": null
+        }
+    ];
+
+    document.getElementById("county").innerHTML = '<p>' + props.NAME + '</p>';
+
+    for (var i = 0; i < countyCourtsData.length; i++) {
+        var obj = countyCourtsData[i];
+        var courtli = document.createElement("li");
+        courtli.id = i;
+        courtli.innerHTML = obj.FullOrganizationCode + ' - ' + obj.OrganizationSubType ;
+        var countydiv = document.getElementById("county");
+        countydiv.appendChild(courtli);
+    }
 };
 
 info.addTo(map);
@@ -47,6 +122,23 @@ function style(feature) {
     };
 }
 
+function clickFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#000',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+
+    info.listcourts(layer.feature.properties);
+}
+
 function highlightFeature(e) {
 	var layer = e.target;
 
@@ -71,15 +163,19 @@ function resetHighlight(e) {
 	info.update();
 }
 
-function zoomToFeature(e) {
-	map.fitBounds(e.target.getBounds());
+function displayCountyDetails(e) {
+    map.fitBounds(e.target.getBounds());
+    clickFeature(e);
 }
+//function zoomToFeature(e) {
+//	map.fitBounds(e.target.getBounds());
+//}
 
 function onEachFeature(feature, layer) {
 	layer.on({
 		mouseover: highlightFeature,
 		mouseout: resetHighlight,
-		click: zoomToFeature
+        click: clickFeature
 	});
 }
 
