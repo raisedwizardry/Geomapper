@@ -1,8 +1,7 @@
 var map = L.map('map').setView([45.1, -86.4997], 6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    id: null
+    maxZoom: 18
 }).addTo(map);
 
 
@@ -22,86 +21,47 @@ info.update = function (props) {
 };
 
 info.listcourts = function (props) {
-    console.log(props.NAME);
-    var CRMApi = 'http://web-dev/CRMAPI/api/GetCurrentCourtAddressByCounty?countyName=' + props.NAME;
-    $.get(CRMApi, function (data, status) {
-        cosole.log(data + "  " + status);
-    });
-    //hit the crmapi to retrieve county data
-    //const countyCourtsData = fetch('http://web-dev/CRMAPI/api/GetCurrentCourtAddressByCounty?countyName='+ props.NAME);
-    //console.log(countyCourtsData); 
-    var countyCourtsData = [
-        {
-            "OrganizationId": "f224a5c9-dbd0-e511-80db-005056836f2c",
-            "FullOrganizationCode": "C29~1",
-            "OrganizationCode": "C29",
-            "DivisionType": null,
-            "OrganizationName": "29th Circuit Court - Clinton",
-            "OrganizationType": "Court",
-            "OrganizationSubType": "Circuit",
-            "ParentOrganizationId": "a8c13f54-dcd0-e511-80db-005056836f2c",
-            "JurisdictionalCountyList": "CLINTON",
-            "OraclePrimaryKey": 5010,
-            "MCLAText": "Clinton County",
-            "segment": 167410000
-        },
-        {
-            "OrganizationId": "f5b19fcf-dbd0-e511-80db-005056836f2c",
-            "FullOrganizationCode": "P19",
-            "OrganizationCode": "P19",
-            "DivisionType": null,
-            "OrganizationName": "Clinton County Probate Court",
-            "OrganizationType": "Court",
-            "OrganizationSubType": "Probate",
-            "ParentOrganizationId": null,
-            "JurisdictionalCountyList": "CLINTON",
-            "OraclePrimaryKey": 425,
-            "MCLAText": "Clinton County",
-            "segment": null
-        },
-        {
-            "OrganizationId": "a8c13f54-dcd0-e511-80db-005056836f2c",
-            "FullOrganizationCode": "C29",
-            "OrganizationCode": "C29",
-            "DivisionType": null,
-            "OrganizationName": "29th Circuit Court",
-            "OrganizationType": "Court",
-            "OrganizationSubType": "Circuit",
-            "ParentOrganizationId": null,
-            "JurisdictionalCountyList": "CLINTON, GRATIOT",
-            "OraclePrimaryKey": 128,
-            "MCLAText": "Clinton and Gratiot Counties",
-            "segment": null
-        },
-        {
-            "OrganizationId": "490eeb88-ddd0-e511-80db-005056836f2c",
-            "FullOrganizationCode": "D65A",
-            "OrganizationCode": "D65A",
-            "DivisionType": null,
-            "OrganizationName": "65A District Court",
-            "OrganizationType": "Court",
-            "OrganizationSubType": "District",
-            "ParentOrganizationId": null,
-            "JurisdictionalCountyList": "CLINTON",
-            "OraclePrimaryKey": 312,
-            "MCLAText": "Clinton County",
-            "segment": null
-        }
-    ];
-
+    console.log(props.FIPSCODE);
+    var CRMApi = 'http://web-dev/CRMAPI/api/GetCurrentCourtAddressByFIPS';
+    var url = createUrl(CRMApi, "fipsCode", props.FIPSCODE);
+    var countyCourts = doAjax(url);
+    var countyCourtsData = countyCourts.responseJSON;
     document.getElementById("county").innerHTML = '<p>' + props.NAME + '</p>';
 
     for (var i = 0; i < countyCourtsData.length; i++) {
         var obj = countyCourtsData[i];
         var courtli = document.createElement("li");
         courtli.id = i;
-        courtli.innerHTML = obj.FullOrganizationCode + ' - ' + obj.OrganizationSubType ;
+        courtli.innerHTML = obj.FullCourtCode + ' - ' + obj.Court ;
         var countydiv = document.getElementById("county");
         countydiv.appendChild(courtli);
     }
 };
 
 info.addTo(map);
+
+function createUrl(endpoint, prop, value) {
+    var url = endpoint + '?' + prop + '=' + value;
+    return url;
+}
+
+function doAjax(ajaxurl) {
+    let result;
+
+    try {
+        result = $.ajax({
+            url: ajaxurl,
+            headers: { 'Accept': 'application/json' },
+            success: function (result) {
+                if (result.isOk == false) alert(result.message);
+            },
+            async: false,
+        });
+        return result;
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 function getColor(d) {
 	return d > 1200 ? '#800026' :
@@ -123,6 +83,10 @@ function style(feature) {
         dashArray: '3',
         fillOpacity: 0.5
     };
+}
+
+function clickCourt(e) {
+    document.getElementById("county").child; 
 }
 
 function clickFeature(e) {
@@ -174,7 +138,7 @@ function onEachFeature(feature, layer) {
 	layer.on({
 		mouseover: highlightFeature,
 		mouseout: resetHighlight,
-        click: clickFeature
+        click: clickFeature, clickCourt,
 	});
 }
 
