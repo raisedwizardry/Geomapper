@@ -27,21 +27,36 @@ info.listcourts = function (props) {
     var countyCourts = doAjax(url);
     var countyCourtsData = countyCourts.responseJSON;
     document.getElementById("county").innerHTML = '<p>' + props.NAME + '</p>';
-
     for (var i = 0; i < countyCourtsData.length; i++) {
         var obj = countyCourtsData[i];
         var courtli = document.createElement("li");
         courtli.id = i;
-        courtli.innerHTML = obj.FullCourtCode + ' - ' + obj.Court ;
+        courtli.innerHTML = obj.FullCourtCode + ' - ' + obj.Court;
         var countydiv = document.getElementById("county");
         countydiv.appendChild(courtli);
+        var AddressLine = replaceAll(obj.AddressLine, " ", "+");
+        var City = replaceAll(obj.City, " ", "+");
+        var State = replaceAll(obj.State, " ", "+");
+        var address = AddressLine + ",+" + City + ",+" + State;
+        var themap = mapGeocode("address", address);
+        console.log(themap);
+        var mapjson = doAjax(themap);
+        console.log(mapjson);
+        var lat = mapjson.responseJSON.results[0].geometry.location.lat;
+        var lng = mapjson.responseJSON.results[0].geometry.location.lng;
+        console.log("lat: " + lat + " lng: " + lng);
+        var littleton = L.marker([lat, lng]).addTo(map);
     }
 };
 
 info.addTo(map);
 
-function createUrl(endpoint, prop, value) {
-    var url = endpoint + '?' + prop + '=' + value;
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function createUrl(endpoint, prop, val) {
+    var url = endpoint + '?' + prop + '=' + val;
     return url;
 }
 
@@ -61,6 +76,14 @@ function doAjax(ajaxurl) {
     } catch (error) {
         console.error(error);
     }
+}
+
+function mapGeocode(prop, val) {
+    var rooturl = "https://maps.googleapis.com/maps/api/geocode/json"
+    var key = "&key=AIzaSyBB405h3Dxy-idGQPG4geuU_xfXrBuN_58"
+    var base = createUrl(rooturl, prop, val)
+    var url = base + key
+    return url;
 }
 
 function getColor(d) {
