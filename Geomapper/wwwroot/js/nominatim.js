@@ -1,6 +1,6 @@
 var map = L.map('map').setView([45.1, -86.4997], 6);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(map);
 
@@ -34,18 +34,19 @@ info.listcourts = function (props) {
         courtli.innerHTML = obj.FullCourtCode + ' - ' + obj.Court;
         var countydiv = document.getElementById("county");
         countydiv.appendChild(courtli);
-        var AddressLine = replaceAll(obj.AddressLine, " ", "+");
-        var City = replaceAll(obj.City, " ", "+");
-        var State = replaceAll(obj.State, " ", "+");
-        var address = AddressLine + ",+" + City + ",+" + State;
-        var themap = mapGeocode("address", address);
+        var AddressLine = obj.AddressLine;
+        var City = obj.City;
+        var State = obj.State;
+        var Zip = obj.ZipCode;
+        var address = AddressLine + "," + City + "," + State + "," + Zip + ",United States of America";
+        var themap = mapGeocode(address);
         console.log(themap);
         var mapjson = doAjax(themap);
         console.log(mapjson);
-        var lat = mapjson.responseJSON.results[0].geometry.location.lat;
-        var lng = mapjson.responseJSON.results[0].geometry.location.lng;
-        console.log("lat: " + lat + " lng: " + lng);
-        var littleton = L.marker([lat, lng]).bindPopup(obj.MclaText).addTo(map);
+        var lat = mapjson.responseJSON[0].lat;
+        var lon = mapjson.responseJSON[0].lon;
+        console.log("lat: " + lat + " lon: " + lon);
+        var littleton = L.marker([lat, lon]).addTo(map);
     }
 };
 
@@ -78,11 +79,11 @@ function doAjax(ajaxurl) {
     }
 }
 
-function mapGeocode(prop, val) {
-    var rooturl = "https://maps.googleapis.com/maps/api/geocode/json"
-    var key = "&key="
-    var base = createUrl(rooturl, prop, val)
-    var url = base + key
+function mapGeocode(val) {
+    var rooturl = "https://nominatim.openstreetmap.org/search/";
+    var key = "?format=json";
+    var base = rooturl + val;
+    var url = base + key;
     return url;
 }
 
